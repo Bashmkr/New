@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
+/* The Riyadh Schools – Al Malqa brand palette */
+@theme {
+  --color-teal: #03656b;
+  --color-teal-dark: #024a4f;
+  --color-teal-50: #e8f3f3;
+  --color-teal-100: #cfe6e7;
+  --color-green: #02d576;
+  --color-green-dark: #01b062;
+  --color-sky: #00cefa;
+  --color-sun: #fecc56;
+  --color-coral: #ff7449;
+  --color-purple: #844fc7;
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: #0f2f31;
+  font-family: var(--font-sans);
+}
+
+/* Subtle circuit / digital dot pattern used on the welcome page */
+.digital-pattern {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(3, 101, 107, 0.14) 1px, transparent 0);
+  background-size: 28px 28px;
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes trace {
+  from { stroke-dashoffset: 600; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(2, 213, 118, 0.45); }
+  70% { box-shadow: 0 0 0 16px rgba(2, 213, 118, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(2, 213, 118, 0); }
+}
+@keyframes load-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.animate-rise { animation: rise-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.animate-fade { animation: fade-in 1.2s ease both; }
+.animate-trace { stroke-dasharray: 600; animation: trace 2.4s ease-out both; }
+.animate-pulse-ring { animation: pulse-ring 2.4s ease-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise, .animate-fade, .animate-trace, .animate-pulse-ring { animation: none; }
 }
