@@ -8,7 +8,7 @@ export const HALF_L = ROOM.length / 2; // 15
 export const EYE_HEIGHT = 1.65;
 export const ART_CENTER_Y = 2.05;
 
-export const PARTITION = { x: 0, zMin: -5.4, zMax: 5.4, thickness: 0.4, height: 4.2 } as const;
+export const PARTITION = { x: 0, zMin: -5.4, zMax: 5.4, thickness: 0.4, height: 5.0 } as const;
 
 export type Slot = {
   id: string;
@@ -64,7 +64,7 @@ export const MID_WALLS = [
   { x: -6, zMin: -4.2, zMax: 4.2 },
   { x: 6, zMin: -4.2, zMax: 4.2 },
 ];
-export const MID_WALL_SIZE = { thickness: 0.3, height: 3.6 } as const;
+export const MID_WALL_SIZE = { thickness: 0.3, height: 5.0 } as const;
 
 const sideWallZ = [6.9, 4.5, 2.1, -0.3, -2.7, -5.1];
 const partitionZ = [4.3, 2.15, 0, -2.15, -4.3];
@@ -75,7 +75,7 @@ const UPPER_Y = 4.05;
 
 /**
  * Hanging order within each area: frames are filled from the first slot to the last.
- * Digital Privacy / Think Before You Post: 25 frames each. Cyber Heroes: 13 frames.
+ * Digital Privacy / Think Before You Post: 38 frames each. Cyber Heroes: 19 frames.
  */
 function sideArea(category: CategoryKey, p: string, side: -1 | 1): Slot[] {
   const outerX = side * (HALF_W - WALL_INSET);
@@ -89,6 +89,9 @@ function sideArea(category: CategoryKey, p: string, side: -1 | 1): Slot[] {
     ...wallSlots(category, `${p}-mid-out`, midX + side * mFace, midWallZ, outerFace === FACE_POS_X ? FACE_NEG_X : FACE_POS_X, 1.6),
     // upper row on the long outer wall (salon hang), used only when an area is very full
     ...wallSlots(category, `${p}-upper`, outerX, sideWallZ, outerFace, 1.25, UPPER_Y),
+    ...wallSlots(category, `${p}-part-upper`, PARTITION.x + side * pFace, partitionZ, side === -1 ? FACE_NEG_X : FACE_POS_X, 1.2, UPPER_Y),
+    ...wallSlots(category, `${p}-mid-in-upper`, midX - side * mFace, midWallZ, side === -1 ? FACE_POS_X : FACE_NEG_X, 1.2, UPPER_Y),
+    ...wallSlots(category, `${p}-mid-out-upper`, midX + side * mFace, midWallZ, outerFace === FACE_POS_X ? FACE_NEG_X : FACE_POS_X, 1.2, UPPER_Y),
   ];
 }
 
@@ -112,6 +115,8 @@ export const SLOTS: Slot[] = [
     maxH: 1.8,
     featured: true,
   })),
+  ...wallSlots("cyber_heroes", "ch-wall-l-upper", -HALF_W + WALL_INSET, [-7.2, -9.5, -11.8], FACE_POS_X, 1.25, UPPER_Y).map((s) => ({ ...s, featured: true })),
+  ...wallSlots("cyber_heroes", "ch-wall-r-upper", HALF_W - WALL_INSET, [-7.2, -9.5, -11.8], FACE_NEG_X, 1.25, UPPER_Y).map((s) => ({ ...s, featured: true })),
 ];
 
 function arcSlot(id: string, side: -1 | 1): Slot[] {
