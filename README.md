@@ -36,7 +36,7 @@ Import the GitHub repository in Vercel and add the three environment variables f
 
 ## Gallery layout
 
-Frame positions are defined in `src/components/gallery/layout.ts`: 9 frames each for Digital Privacy and Think Before You Post, 7 featured frames for Cyber Heroes. Published artwork fills frames in display order; the dashboard shows how many frames each area has left.
+Frame positions are defined in `src/components/gallery/layout.ts`: 25 frames each for Digital Privacy and Think Before You Post (outer wall, centre partition, a freestanding middle wall, then an upper row), and 13 featured frames for Cyber Heroes. Extra frames only appear once artwork fills them. Published artwork fills frames in display order; the dashboard shows how many frames each area has left.
 
 ## Local development with a local Supabase
 

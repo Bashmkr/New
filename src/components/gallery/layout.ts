@@ -20,6 +20,8 @@ export type Slot = {
   maxW: number;
   maxH: number;
   featured?: boolean;
+  /** Base slots show an empty frame while waiting for artwork; extra slots appear only when filled. */
+  base?: boolean;
 };
 
 const FACE_POS_X = Math.PI / 2; // faces +x
@@ -34,15 +36,18 @@ function wallSlots(
   x: number,
   zs: number[],
   rotationY: number,
-  size = 1.9,
+  size = 1.8,
+  y = ART_CENTER_Y,
+  base = false,
 ): Slot[] {
   return zs.map((z, i) => ({
     id: `${prefix}-${i + 1}`,
     category,
-    position: [x, ART_CENTER_Y, z],
+    position: [x, y, z],
     rotationY,
     maxW: size,
     maxH: size,
+    base,
   }));
 }
 
@@ -54,23 +59,59 @@ export const HERO_WALLS = [
 ];
 export const HERO_WALL_SIZE = { width: 3.0, height: 3.9, thickness: 0.3 } as const;
 
-const sideWallZ = [6.4, 3.8, 1.2, -1.4, -4.0];
-const partitionZ = [4.05, 1.35, -1.35, -4.05];
+/** Freestanding double-sided walls in the middle of Areas 02 and 03 (more hanging space). */
+export const MID_WALLS = [
+  { x: -6, zMin: -4.2, zMax: 4.2 },
+  { x: 6, zMin: -4.2, zMax: 4.2 },
+];
+export const MID_WALL_SIZE = { thickness: 0.3, height: 3.6 } as const;
+
+const sideWallZ = [6.9, 4.5, 2.1, -0.3, -2.7, -5.1];
+const partitionZ = [4.3, 2.15, 0, -2.15, -4.3];
+const midWallZ = [3.15, 1.05, -1.05, -3.15];
 const pFace = PARTITION.thickness / 2 + WALL_INSET;
+const mFace = MID_WALL_SIZE.thickness / 2 + WALL_INSET;
+const UPPER_Y = 4.05;
+
+/**
+ * Hanging order within each area: frames are filled from the first slot to the last.
+ * Digital Privacy / Think Before You Post: 25 frames each. Cyber Heroes: 13 frames.
+ */
+function sideArea(category: CategoryKey, p: string, side: -1 | 1): Slot[] {
+  const outerX = side * (HALF_W - WALL_INSET);
+  const outerFace = side === -1 ? FACE_POS_X : FACE_NEG_X;
+  const midX = side * 6;
+  return [
+    ...wallSlots(category, `${p}-wall`, outerX, sideWallZ, outerFace, 1.8, ART_CENTER_Y, true),
+    ...wallSlots(category, `${p}-part`, PARTITION.x + side * pFace, partitionZ, side === -1 ? FACE_NEG_X : FACE_POS_X, 1.7, ART_CENTER_Y, true),
+    // middle wall: face toward the centre partition, then face toward the outer wall
+    ...wallSlots(category, `${p}-mid-in`, midX - side * mFace, midWallZ, side === -1 ? FACE_POS_X : FACE_NEG_X, 1.6),
+    ...wallSlots(category, `${p}-mid-out`, midX + side * mFace, midWallZ, outerFace === FACE_POS_X ? FACE_NEG_X : FACE_POS_X, 1.6),
+    // upper row on the long outer wall (salon hang), used only when an area is very full
+    ...wallSlots(category, `${p}-upper`, outerX, sideWallZ, outerFace, 1.25, UPPER_Y),
+  ];
+}
 
 export const SLOTS: Slot[] = [
   // AREA 02 — Digital Privacy (left side of the room)
-  ...wallSlots("digital_privacy", "dp-wall", -HALF_W + WALL_INSET, sideWallZ, FACE_POS_X),
-  ...wallSlots("digital_privacy", "dp-part", PARTITION.x - pFace, partitionZ, FACE_NEG_X),
+  ...sideArea("digital_privacy", "dp", -1),
   // AREA 03 — Think Before You Post (right side of the room)
-  ...wallSlots("think_before_you_post", "tp-wall", HALF_W - WALL_INSET, sideWallZ, FACE_NEG_X),
-  ...wallSlots("think_before_you_post", "tp-part", PARTITION.x + pFace, partitionZ, FACE_POS_X),
-  // AREA 04 — Cyber Heroes: a featured arc of freestanding walls plus the rear side walls
-  { id: "ch-arc-1", category: "cyber_heroes", position: [0, ART_CENTER_Y + 0.15, -9.3 + 0.16], rotationY: FACE_POS_Z, maxW: 2.2, maxH: 2.2, featured: true },
+  ...sideArea("think_before_you_post", "tp", 1),
+  // AREA 04 — Cyber Heroes: featured arc of freestanding walls, rear side walls, then back-wall flanks
+  { id: "ch-arc-1", category: "cyber_heroes", position: [0, ART_CENTER_Y + 0.15, -9.3 + 0.16], rotationY: FACE_POS_Z, maxW: 2.2, maxH: 2.2, featured: true, base: true },
   ...arcSlot("ch-arc-2", -1),
   ...arcSlot("ch-arc-3", 1),
-  ...wallSlots("cyber_heroes", "ch-wall-l", -HALF_W + WALL_INSET, [-7.9, -10.7], FACE_POS_X, 2.0).map((s) => ({ ...s, featured: true })),
-  ...wallSlots("cyber_heroes", "ch-wall-r", HALF_W - WALL_INSET, [-7.9, -10.7], FACE_NEG_X, 2.0).map((s) => ({ ...s, featured: true })),
+  ...wallSlots("cyber_heroes", "ch-wall-l", -HALF_W + WALL_INSET, [-7.2, -9.5, -11.8], FACE_POS_X, 1.8, ART_CENTER_Y, true).map((s) => ({ ...s, featured: true })),
+  ...wallSlots("cyber_heroes", "ch-wall-r", HALF_W - WALL_INSET, [-7.2, -9.5, -11.8], FACE_NEG_X, 1.8, ART_CENTER_Y, true).map((s) => ({ ...s, featured: true })),
+  ...[-10.1, -7.3, 7.3, 10.1].map((x, i) => ({
+    id: `ch-back-${i + 1}`,
+    category: "cyber_heroes" as CategoryKey,
+    position: [x, ART_CENTER_Y, -HALF_L + WALL_INSET] as [number, number, number],
+    rotationY: FACE_POS_Z,
+    maxW: 1.8,
+    maxH: 1.8,
+    featured: true,
+  })),
 ];
 
 function arcSlot(id: string, side: -1 | 1): Slot[] {
@@ -86,6 +127,7 @@ function arcSlot(id: string, side: -1 | 1): Slot[] {
       maxW: 2.0,
       maxH: 2.2,
       featured: true,
+      base: true,
     },
   ];
 }
@@ -99,6 +141,7 @@ export const SLOT_CAPACITY: Record<CategoryKey, number> = {
 /** Axis-aligned obstacles visitors cannot walk through: [minX, maxX, minZ, maxZ]. */
 export const OBSTACLES: [number, number, number, number][] = [
   [PARTITION.x - PARTITION.thickness / 2, PARTITION.x + PARTITION.thickness / 2, PARTITION.zMin, PARTITION.zMax],
+  ...MID_WALLS.map((w) => [w.x - MID_WALL_SIZE.thickness / 2, w.x + MID_WALL_SIZE.thickness / 2, w.zMin, w.zMax] as [number, number, number, number]),
   // entrance arch pillars
   [-5.6, -4.6, 7.6, 8.4],
   [4.6, 5.6, 7.6, 8.4],
@@ -115,8 +158,8 @@ export type AreaStop = { id: string; label: string; short: string; position: [nu
 /** Positions the "Jump to area" menu moves the visitor to. yaw: 0 looks toward -z. */
 export const AREA_STOPS: AreaStop[] = [
   { id: "a1", short: "01", label: "Welcome Entrance", position: [0, 14.2], yaw: 0 },
-  { id: "a2", short: "02", label: "Digital Privacy", position: [-6, 1.2], yaw: Math.PI / 2 },
-  { id: "a3", short: "03", label: "Think Before You Post", position: [6, 1.2], yaw: -Math.PI / 2 },
+  { id: "a2", short: "02", label: "Digital Privacy", position: [-3.1, 0], yaw: Math.PI / 2 },
+  { id: "a3", short: "03", label: "Think Before You Post", position: [3.1, 0], yaw: -Math.PI / 2 },
   { id: "a4", short: "04", label: "Cyber Heroes", position: [0, -6.1], yaw: 0 },
   { id: "a5", short: "05", label: "Closing", position: [0, -10.3], yaw: 0 },
 ];

@@ -6,7 +6,7 @@ import * as THREE from "three";
 import type { PublicArtwork } from "@/lib/artworks";
 import { CATEGORIES } from "@/lib/categories";
 import { ArtworkFrame } from "./ArtworkFrame";
-import { COLORS, Closing, Entrance, HangingSign, Room, WallTitle } from "./Architecture";
+import { COLORS, Closing, Entrance, HangingSign, MidWalls, Room, WallTitle } from "./Architecture";
 import { HALF_W, SLOTS } from "./layout";
 import { VisitorControls } from "./VisitorControls";
 
@@ -113,14 +113,16 @@ export default function GalleryScene({
         <HangingSign position={[0, 5.5, -6.2]} number="04" title="Cyber Heroes" theme="Featured Student Artwork" accent={COLORS.sun} />
 
         {/* Section titles on the walls */}
-        <WallTitle position={[-HALF_W + 0.05, 4.75, 1.2]} rotationY={Math.PI / 2} number="02" title="Digital Privacy" theme="Protect Your Personal Information" />
-        <WallTitle position={[HALF_W - 0.05, 4.75, 1.2]} rotationY={-Math.PI / 2} number="03" title="Think Before You Post" theme="Be Responsible Online" />
-        <WallTitle position={[-HALF_W + 0.05, 4.75, -9.3]} rotationY={Math.PI / 2} number="04" title="Cyber Heroes" theme="Featured Student Artwork" />
-        <WallTitle position={[HALF_W - 0.05, 4.75, -9.3]} rotationY={-Math.PI / 2} number="04" title="Cyber Heroes" theme="Featured Student Artwork" />
+        <WallTitle position={[-HALF_W + 0.05, 5.65, 1.2]} rotationY={Math.PI / 2} number="02" title="Digital Privacy" theme="Protect Your Personal Information" />
+        <WallTitle position={[HALF_W - 0.05, 5.65, 1.2]} rotationY={-Math.PI / 2} number="03" title="Think Before You Post" theme="Be Responsible Online" />
+        <WallTitle position={[-HALF_W + 0.05, 5.65, -9.3]} rotationY={Math.PI / 2} number="04" title="Cyber Heroes" theme="Featured Student Artwork" />
+        <WallTitle position={[HALF_W - 0.05, 5.65, -9.3]} rotationY={-Math.PI / 2} number="04" title="Cyber Heroes" theme="Featured Student Artwork" />
 
-        {SLOTS.map((slot) => (
+        {/* Base frames always show (empty frames await artwork); extra frames appear only when filled */}
+        {SLOTS.filter((slot) => slot.base || placed.has(slot.id)).map((slot) => (
           <ArtworkFrame key={slot.id} slot={slot} artwork={placed.get(slot.id)} onOpen={onOpen} lowPower={lowPower} />
         ))}
+        <MidWalls />
 
         <Closing />
       </Suspense>

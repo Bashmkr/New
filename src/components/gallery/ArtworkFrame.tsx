@@ -9,6 +9,23 @@ import { COLORS, FONT_MED, FONT_SEMI } from "./Architecture";
 import type { Slot } from "./layout";
 import { ROOM } from "./layout";
 
+let poolTexture: THREE.Texture | null = null;
+/** Shared soft radial gradient used for the light pool above each artwork. */
+function lightPool(): THREE.Texture {
+  if (poolTexture) return poolTexture;
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const ctx = c.getContext("2d")!;
+  const g = ctx.createRadialGradient(64, 40, 4, 64, 64, 64);
+  g.addColorStop(0, "rgba(255,255,255,0.95)");
+  g.addColorStop(0.45, "rgba(255,255,255,0.45)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  poolTexture = new THREE.CanvasTexture(c);
+  return poolTexture;
+}
+
 const MAT = 0.09; // white passe-partout around the drawing
 const FRAME = 0.06; // frame moulding width
 const FRAME_DEPTH = 0.05;
@@ -77,6 +94,8 @@ export function ArtworkFrame({
   const frameColor = slot.featured ? "#2a2a2a" : COLORS.tealDark;
 
   const spotTarget = useMemo(() => new THREE.Object3D(), []);
+  const upper = slot.id.includes("-upper");
+  const realLight = slot.id.startsWith("ch-arc");
 
   useEffect(() => {
     if (!hover) return;
@@ -93,14 +112,14 @@ export function ArtworkFrame({
   };
 
   // White display panel behind each artwork so drawings stand out against the teal wall
-  const panelW = slot.maxW + 0.5;
-  const panelH = slot.maxH + 0.7;
+  const panelW = slot.maxW + 0.4;
+  const panelH = slot.maxH + (upper ? 0.35 : 0.7);
 
   return (
     <group position={slot.position} rotation-y={slot.rotationY}>
       {/* display panel (on wall slots only; feature walls are already white) */}
       {!slot.id.startsWith("ch-arc") && (
-        <mesh position={[0, -0.05, -0.03]} receiveShadow>
+        <mesh position={[0, upper ? 0 : -0.05, -0.03]} receiveShadow>
           <boxGeometry args={[panelW, panelH, 0.03]} />
           <meshStandardMaterial color={COLORS.white} roughness={0.8} />
         </mesh>
@@ -164,31 +183,46 @@ export function ArtworkFrame({
         </group>
       )}
 
-      {/* ceiling spotlight fixture + light aimed at the artwork */}
-      <group position={[0, ROOM.height - 0.62 - slot.position[1], 2.0]}>
-        <mesh rotation-x={-0.75}>
-          <cylinderGeometry args={[0.07, 0.1, 0.24, 16]} />
-          <meshStandardMaterial color="#2b2f30" roughness={0.4} metalness={0.7} />
-        </mesh>
-        <mesh position={[0, -0.09, -0.08]} rotation-x={-0.75 + Math.PI / 2}>
-          <circleGeometry args={[0.065, 16]} />
-          <meshBasicMaterial color="#fff6dc" toneMapped={false} />
-        </mesh>
-      </group>
-      <primitive object={spotTarget} position={[0, 0, 0]} />
-      <spotLight
-        position={[0, ROOM.height - 0.75 - slot.position[1], 1.9]}
-        target={spotTarget}
-        angle={slot.featured ? 0.36 : 0.33}
-        penumbra={0.65}
-        intensity={slot.featured ? 70 : 55}
-        distance={12}
-        decay={2}
-        color="#fff3dc"
-        castShadow={slot.featured && !lowPower}
-        shadow-mapSize={[512, 512]}
-        shadow-bias={-0.0004}
-      />
+      {/* ceiling spotlight fixture */}
+      {!upper && (
+        <group position={[0, ROOM.height - 0.62 - slot.position[1], 2.0]}>
+          <mesh rotation-x={-0.75}>
+            <cylinderGeometry args={[0.07, 0.1, 0.24, 16]} />
+            <meshStandardMaterial color="#2b2f30" roughness={0.4} metalness={0.7} />
+          </mesh>
+          <mesh position={[0, -0.09, -0.08]} rotation-x={-0.75 + Math.PI / 2}>
+            <circleGeometry args={[0.065, 16]} />
+            <meshBasicMaterial color="#fff6dc" toneMapped={false} />
+          </mesh>
+        </group>
+      )}
+
+      {/* Pool of warm light on the wall. A real light per frame would be far too heavy for
+          phones with 60+ frames, so the pool is painted with a soft additive gradient. */}
+      <mesh position={[0, upper ? 0.15 : 0.3, -0.011]} renderOrder={1}>
+        <planeGeometry args={[slot.maxW + 1.3, slot.maxH + (upper ? 1.0 : 1.7)]} />
+        <meshBasicMaterial map={lightPool()} color="#fff1d6" transparent opacity={0.55} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
+      </mesh>
+
+      {/* real spotlights only on the three featured Cyber Heroes walls */}
+      {realLight && (
+        <>
+          <primitive object={spotTarget} position={[0, 0, 0]} />
+          <spotLight
+            position={[0, ROOM.height - 0.75 - slot.position[1], 1.9]}
+            target={spotTarget}
+            angle={0.36}
+            penumbra={0.65}
+            intensity={70}
+            distance={12}
+            decay={2}
+            color="#fff3dc"
+            castShadow={!lowPower}
+            shadow-mapSize={[512, 512]}
+            shadow-bias={-0.0004}
+          />
+        </>
+      )}
     </group>
   );
 }

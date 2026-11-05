@@ -9,6 +9,8 @@ import {
   HALF_W,
   HERO_WALLS,
   HERO_WALL_SIZE,
+  MID_WALLS,
+  MID_WALL_SIZE,
   PARTITION,
   ROOM,
 } from "./layout";
@@ -139,6 +141,26 @@ export function Room() {
         <cylinderGeometry args={[4.4, 4.4, 0.08, 64, 1, false, -Math.PI / 2, Math.PI]} />
         <meshStandardMaterial color="#f4f7f7" roughness={0.55} />
       </mesh>
+    </group>
+  );
+}
+
+/** Freestanding double-sided teal walls in Areas 02 and 03. */
+export function MidWalls() {
+  const wallMat = useWallMaterial();
+  return (
+    <group>
+      {MID_WALLS.map((w) => (
+        <group key={w.x}>
+          <mesh position={[w.x, MID_WALL_SIZE.height / 2, (w.zMin + w.zMax) / 2]} castShadow receiveShadow material={wallMat}>
+            <boxGeometry args={[MID_WALL_SIZE.thickness, MID_WALL_SIZE.height, w.zMax - w.zMin]} />
+          </mesh>
+          <mesh position={[w.x, MID_WALL_SIZE.height + 0.02, (w.zMin + w.zMax) / 2]}>
+            <boxGeometry args={[MID_WALL_SIZE.thickness + 0.04, 0.04, w.zMax - w.zMin + 0.04]} />
+            <meshStandardMaterial color={COLORS.white} roughness={0.5} />
+          </mesh>
+        </group>
+      ))}
     </group>
   );
 }
