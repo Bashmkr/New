@@ -6,6 +6,7 @@ import { useProgress } from "@react-three/drei";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 import { fetchPublishedArtworks, type PublicArtwork } from "@/lib/artworks";
+import { ambientMusic } from "@/lib/ambientMusic";
 import { categoryLabel } from "@/lib/categories";
 import { Joystick } from "./Joystick";
 import { AREA_STOPS } from "./layout";
@@ -37,6 +38,8 @@ export function GalleryExperience({ onExit }: { onExit: () => void }) {
   const { active, progress } = useProgress();
   const [sceneReady, setSceneReady] = useState(false);
   const [fading, setFading] = useState(false);
+  const [musicOn, setMusicOn] = useState(ambientMusic.playing);
+  useEffect(() => ambientMusic.subscribe(setMusicOn), []);
 
   // Area jumps: a short fade, then the visitor is placed in the new area (never walks through walls)
   const jumpTo = useCallback((x: number, z: number, yaw: number) => {
@@ -162,6 +165,26 @@ export function GalleryExperience({ onExit }: { onExit: () => void }) {
               </nav>
             )}
           </div>
+          <button
+            type="button"
+            onClick={() => ambientMusic.toggle()}
+            aria-label={musicOn ? "Turn music off" : "Turn music on"}
+            aria-pressed={musicOn}
+            title={musicOn ? "Music on" : "Music off"}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-teal shadow-md backdrop-blur transition hover:bg-white"
+          >
+            {musicOn ? (
+              <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden>
+                <path d="M3 8v4h3l4 3.5v-11L6 8H3Z" fill="currentColor" />
+                <path d="M13 7.5a3.5 3.5 0 0 1 0 5M15.2 5.3a6.5 6.5 0 0 1 0 9.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden>
+                <path d="M3 8v4h3l4 3.5v-11L6 8H3Z" fill="currentColor" />
+                <path d="m13 8 4 4m0-4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
           <button
             type="button"
             onClick={() => setGuide(true)}
