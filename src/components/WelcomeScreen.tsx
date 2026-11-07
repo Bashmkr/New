@@ -46,7 +46,10 @@ export function WelcomeScreen({ onEnter, leaving }: { onEnter: () => void; leavi
           className="animate-rise mt-6 max-w-xl text-base leading-relaxed text-[#2c5254] sm:text-lg"
           style={{ animationDelay: "0.7s" }}
         >
-          Welcome to the Cyber Safety Gallery — Protect your personal information
+          Welcome to the Cyber Safety Gallery
+          <span className="mt-2 block text-xs font-semibold uppercase tracking-[0.28em] text-green-dark sm:text-sm">
+            Protect your personal information
+          </span>
         </p>
 
         <button

@@ -310,9 +310,12 @@ export function Entrance() {
         anchorX="center"
         anchorY="middle"
       >
-        {"Welcome to the Cyber Safety Gallery —\nProtect your personal information"}
+        Welcome to the Cyber Safety Gallery
       </Text>
-      <mesh position={[-HALF_W + 0.07, 1.45, 11.6]} rotation-y={Math.PI / 2}>
+      <Text font={FONT_MED} position={[-HALF_W + 0.07, 1.85, 11.6]} rotation-y={Math.PI / 2} fontSize={0.15} letterSpacing={0.22} color={COLORS.green} anchorX="center" anchorY="middle">
+        PROTECT YOUR PERSONAL INFORMATION
+      </Text>
+      <mesh position={[-HALF_W + 0.07, 1.5, 11.6]} rotation-y={Math.PI / 2}>
         <planeGeometry args={[1.2, 0.05]} />
         <meshBasicMaterial color={COLORS.green} />
       </mesh>
