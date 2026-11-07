@@ -70,8 +70,8 @@ export function WelcomeScreen({ onEnter, leaving }: { onEnter: () => void; leavi
         </p>
       </div>
 
-      <footer className="absolute bottom-5 z-10 text-center text-[11px] text-[#5b7a7c]">
-        © The Riyadh Schools – Al Malqa · Student artwork shared with permission ·{" "}
+      <footer className="absolute bottom-5 z-10 px-4 text-center text-[10px] tracking-wide text-[#7a9597]">
+        Created by the ICT Girls Campus Team ·{" "}
         <a href="/staff" className="underline-offset-2 hover:text-teal hover:underline">
           Staff
         </a>
