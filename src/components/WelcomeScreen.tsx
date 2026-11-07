@@ -67,10 +67,6 @@ export function WelcomeScreen({ onEnter, leaving }: { onEnter: () => void; leavi
             <path d="M4 10h11m0 0-4.5-4.5M15 10l-4.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-
-        <p className="animate-fade mt-6 text-xs text-[#5b7a7c]" style={{ animationDelay: "1.3s" }}>
-          A virtual 3D art exhibition · Works on computers, tablets and phones
-        </p>
       </div>
 
       <footer className="absolute bottom-5 z-10 px-4 text-center text-[10px] tracking-wide text-[#7a9597]">
